@@ -2,12 +2,6 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
-            steps {
-                git 'https://github.com/Mouadh-kaabi/DistrubtionMusical.git'
-            }
-        }
-
         stage('Build Backend') {
             steps {
                 sh 'docker compose build backend_distribution'
