@@ -1,0 +1,21 @@
+# Maven / Gradle
+target/
+build/
+out/
+
+# Node.js
+node_modules/
+dist/
+
+# IDE
+.idea/
+.vscode/
+
+# Logs
+*.log
+logs/
+
+# Docker volumes locaux
+mysql-distribution-data/
+jenkins_home/
+

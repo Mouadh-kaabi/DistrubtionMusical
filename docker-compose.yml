@@ -1,0 +1,85 @@
+services:
+  db_distribution:
+    image: mysql:8.0
+    container_name: distribution-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: distribution_musicauxnew
+      MYSQL_PASSWORD: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql-distribution-data:/var/lib/mysql
+    networks:
+      - distribution-network
+
+  backend_distribution:
+    build:
+      context: ./backDistrubtion-master
+      dockerfile: Dockerfile
+    container_name: distribution-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db_distribution:3306/distribution_musicauxnew
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      bezkoder.app.jwtSecret: mouadh
+      bezkoder.app.jwtExpirationMs: 86400000
+      SPRING_MAIL_HOST: disabled
+    ports:
+      - "8087:8081"
+    depends_on:
+      - db_distribution
+    networks:
+      - distribution-network
+
+  frontend_distribution:
+    build:
+      context: ./smarnewFront-master
+      dockerfile: Dockerfile
+    container_name: distribution-frontend
+    volumes:
+       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "8086:80"
+    depends_on:
+      - backend_distribution
+    networks:
+      - distribution-network
+
+  nginx:
+    image: nginx:latest
+    container_name: distribution-nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./smarnewFront-master/dist/dis-music:/usr/share/nginx/html
+    ports:
+      - "8080:80"
+    depends_on:
+      - frontend_distribution
+      - backend_distribution
+    networks:
+      - distribution-network
+
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    user: root
+    ports:
+      - "8082:8082"         # Accès Jenkins via http://192.168.1.95:8080
+      - "50000:50000"       # Port pour agents Jenkins (si besoin)
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - distribution-network
+
+volumes:
+  mysql-distribution-data:
+  jenkins_home:
+
+networks:
+  distribution-network:
+
+
+
